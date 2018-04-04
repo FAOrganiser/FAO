@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "362996494784",
+    "firebase_url": "https://familyapp-b6ddd.firebaseio.com",
+    "project_id": "familyapp-b6ddd",
+    "storage_bucket": "familyapp-b6ddd.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:362996494784:android:654bbe4e0fffb3af",
+        "android_client_info": {
+          "package_name": "com.cristina.fao"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "362996494784-vmtqrf5ppgaa1fc5h1i1iqi0vqo6kiqh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdETXwzlyHkgar4h9FY50cnBzJKZ7t44M"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
