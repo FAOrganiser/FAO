@@ -15,6 +15,10 @@ import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
+/*
+TODO: interfata pentru home-ul utilizatorului
+    in principal butonul de creare familie
+ */
 public class HomeUserActivity extends AppCompatActivity {
 
     @Override
