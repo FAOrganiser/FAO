@@ -20,7 +20,9 @@
         </activity>
         <activity android:name=".HomeUserActivity" />
         <activity android:name=".ListActivity" />
-        <activity android:name=".DetailListActivity"></activity>
+        <activity android:name=".DetailListActivity" />
+        <activity android:name=".FamilyActivity" />
+        <activity android:name=".NewListActivity"></activity>
     </application>
 
 </manifest>
