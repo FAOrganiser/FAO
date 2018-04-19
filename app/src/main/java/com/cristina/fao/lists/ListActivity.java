@@ -90,9 +90,9 @@ public class ListActivity extends AppCompatActivity{
                     @Override
                     public void onClick(View v) {
                         // Launch PostDetailActivity
-                       // Intent intent = new Intent(getApplicationContext(), DetailListActivity.class);
-                       // intent.putExtra(DetailListActivity.EXTRA_LIST_KEY, listKey);
-                       // startActivity(intent);
+                        Intent intent = new Intent(getApplicationContext(), DetailListActivity.class);
+                        intent.putExtra(DetailListActivity.EXTRA_LIST_KEY, listKey);
+                        startActivity(intent);
                     }
                 });
                 Log.i("tag5", model.getName());

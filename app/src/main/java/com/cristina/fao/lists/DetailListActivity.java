@@ -1,12 +1,16 @@
 package com.cristina.fao.lists;
 
 import android.content.Context;
+import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cristina.fao.R;
@@ -19,7 +23,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class DetailListActivity extends AppCompatActivity {
 
@@ -28,8 +34,8 @@ public class DetailListActivity extends AppCompatActivity {
     private DatabaseReference mListReference;
     private DatabaseReference mIngredientsReference;
     private ValueEventListener mListListener;
-    //private IngredientsAdapter mAdapter;
-    private RecyclerView mIngredientsRecycler;
+    private RecyclerView mContentsRecycler;
+    private ContentsAdapter mContentsAdapter;
 
     private String mPostKey;
     @Override
@@ -45,167 +51,189 @@ public class DetailListActivity extends AppCompatActivity {
         // Initialize Database
         mListReference = FirebaseDatabase.getInstance().getReference()
                 .child("family-lists").child(mPostKey);
-        mIngredientsReference = FirebaseDatabase.getInstance().getReference()
-                .child("ingredients-lists").child(mPostKey);
+
+        mContentsRecycler = (RecyclerView) findViewById(R.id.recycler);
+
+        LinearLayoutManager layoutManager
+                = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+
+        mContentsRecycler.setLayoutManager(layoutManager);
+
+        mContentsRecycler.setHasFixedSize(true);
+
+        mContentsRecycler.setAdapter(mContentsAdapter);
     }
 
-   /* @Override
+    @Override
     public void onStart() {
         super.onStart();
 
         // Add value event listener to the post
         // [START post_value_event_listener]
-        ValueEventListener postListener = new ValueEventListener() {
+        /*ValueEventListener postListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // Get Post object and use the values to update the UI
-                List list = dataSnapshot.getValue(List.class);
-                // [START_EXCLUDE]
-                // TODO: setare elemente de ui
-                // [END_EXCLUDE]
+                ShoppingList list = dataSnapshot.getValue(ShoppingList.class);
+                mContentsAdapter.mIngredientsName = list.getmIngredients().keySet();
+                mContentsAdapter.mIngredientQuantity = (ArrayList<String>) list.getmIngredients().values();
+                // TODO: setare elemente de UI cu datele luate
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
-                // Getting Post failed, log a message
-                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                // [START_EXCLUDE]
-                Toast.makeText(DetailListActivity.this, "Failed to load post.",
-                        Toast.LENGTH_SHORT).show();
-                // [END_EXCLUDE]
-            }
+            public void onCancelled(DatabaseError databaseError) {}
         };
-        mListReference.addValueEventListener(postListener);
-        // [END post_value_event_listener]
+        mListReference.addValueEventListener(postListener);*/
 
         // Keep copy of post listener so we can remove it when app stops
-        mListListener = postListener;
+        //mListListener = postListener;
 
-        // Listen for comments
-        mAdapter = new IngredientsAdapter(this, mIngredientsReference);
-        mIngredientsRecycler.setAdapter(mAdapter);
+        mContentsAdapter = new ContentsAdapter(this, mListReference);
+        mContentsRecycler.setAdapter(mContentsAdapter);
+
     }
 
-    private static class IngredientsViewHolder extends RecyclerView.ViewHolder {
+    private static class ContentsViewHolder extends RecyclerView.ViewHolder {
 
-        public IngredientsViewHolder(View itemView) {
+        public TextView mIngrName;
+        public TextView mIngrQuantity;
+
+        public ContentsViewHolder(View itemView) {
             super(itemView);
+
+            mIngrName = (TextView) itemView.findViewById(R.id.textViewName);
+            mIngrQuantity = (TextView) itemView.findViewById(R.id.textViewQuantity);
         }
     }
 
-    private static class IngredientsAdapter extends RecyclerView.Adapter<IngredientsViewHolder> {
+    private static class ContentsAdapter extends RecyclerView.Adapter<ContentsViewHolder> {
 
-        private Context mContext;
-        private DatabaseReference mDatabaseReference;
+            private Context mContext;
+            private DatabaseReference mDatabaseReference;
+            private ChildEventListener mChildEventListener;
 
-        private List<String> mIngredientsName = new ArrayList<>();
-        private List<Integer> mIngredientQuantity = new ArrayList<>();
-        )
-        public  IngredientsAdapter(final Context context, DatabaseReference ref) {
-            mContext = context;
-            mDatabaseReference = ref;
+            private List<String> mIngredientsName = new ArrayList<>();
+            private List<String> mIngredientsQuantity = new ArrayList<>();
 
-            ChildEventListener childEventListener = new ChildEventListener() {
-                @Override
-                public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
-                    Log.d(TAG, "onChildAdded:" + dataSnapshot.getKey());
+            public ContentsAdapter(final Context context, DatabaseReference ref) {
+                mContext = context;
+                mDatabaseReference = ref;
 
-                    // A new comment has been added, add it to the displayed list
-                    Ingredient list = dataSnapshot.getValue(ShoppingList.class);
+                // Create child event listener
+                // [START child_event_listener_recycler]
+                ChildEventListener childEventListener = new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
+                        Log.d("tag", "onChildAdded:" + dataSnapshot.getKey());
 
-                    // [START_EXCLUDE]
-                    // Update RecyclerView
-                    mIngredientsName.add(list.getName());
-                    mIngredientQuantity.add();
-                    notifyItemInserted(mComments.size() - 1);
-                    // [END_EXCLUDE]
-                }
+                        // A new comment has been added, add it to the displayed list
+                        ShoppingList.Ingredient ingr = dataSnapshot.getValue(ShoppingList.Ingredient.class);
 
-                @Override
-                public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
-                    Log.d(TAG, "onChildChanged:" + dataSnapshot.getKey());
-
-                    // A comment has changed, use the key to determine if we are displaying this
-                    // comment and if so displayed the changed comment.
-                    Comment newComment = dataSnapshot.getValue(Comment.class);
-                    String commentKey = dataSnapshot.getKey();
-
-                    // [START_EXCLUDE]
-                    int commentIndex = mCommentIds.indexOf(commentKey);
-                    if (commentIndex > -1) {
-                        // Replace with the new data
-                        mComments.set(commentIndex, newComment);
-
-                        // Update the RecyclerView
-                        notifyItemChanged(commentIndex);
-                    } else {
-                        Log.w(TAG, "onChildChanged:unknown_child:" + commentKey);
+                        // [START_EXCLUDE]
+                        // Update RecyclerView
+                        mIngredientsName.add(ingr.getIngredient());
+                        mIngredientsQuantity.add(ingr.getQuantity());
+                        notifyItemInserted(mIngredientsName.size() - 1);
+                        // [END_EXCLUDE]
                     }
-                    // [END_EXCLUDE]
-                }
 
-                @Override
-                public void onChildRemoved(DataSnapshot dataSnapshot) {
-                    Log.d(TAG, "onChildRemoved:" + dataSnapshot.getKey());
+                    @Override
+                    public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
+                        Log.d("tag", "onChildChanged:" + dataSnapshot.getKey());
 
-                    // A comment has changed, use the key to determine if we are displaying this
-                    // comment and if so remove it.
-                    String commentKey = dataSnapshot.getKey();
+                        // A comment has changed, use the key to determine if we are displaying this
+                        // comment and if so displayed the changed comment.
+                        ShoppingList.Ingredient newIngr = dataSnapshot.getValue(ShoppingList.Ingredient.class);
 
-                    // [START_EXCLUDE]
-                    int commentIndex = mCommentIds.indexOf(commentKey);
-                    if (commentIndex > -1) {
-                        // Remove data from the list
-                        mCommentIds.remove(commentIndex);
-                        mComments.remove(commentIndex);
+                        // [START_EXCLUDE]
+                        int ingrIndex = mIngredientsName.indexOf(newIngr.getIngredient());
+                        if (ingrIndex > -1) {
+                            // Replace with the new data
+                            mIngredientsName.set(ingrIndex, newIngr.getIngredient());
+                            mIngredientsQuantity.set(ingrIndex, newIngr.getQuantity());
 
-                        // Update the RecyclerView
-                        notifyItemRemoved(commentIndex);
-                    } else {
-                        Log.w(TAG, "onChildRemoved:unknown_child:" + commentKey);
+                            // Update the RecyclerView
+                            notifyItemChanged(ingrIndex);
+                        } else {
+                            Log.w("tag", "onChildChanged:unknown_child:" + ingrIndex);
+                        }
+                        // [END_EXCLUDE]
                     }
-                    // [END_EXCLUDE]
+
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {
+                        /*Log.d(TAG, "onChildRemoved:" + dataSnapshot.getKey());
+
+                        // A comment has changed, use the key to determine if we are displaying this
+                        // comment and if so remove it.
+                        String commentKey = dataSnapshot.getKey();
+
+                        // [START_EXCLUDE]
+                        int commentIndex = mCommentIds.indexOf(commentKey);
+                        if (commentIndex > -1) {
+                            // Remove data from the list
+                            mCommentIds.remove(commentIndex);
+                            mComments.remove(commentIndex);
+
+                            // Update the RecyclerView
+                            notifyItemRemoved(commentIndex);
+                        } else {
+                            Log.w(TAG, "onChildRemoved:unknown_child:" + commentKey);
+                        }*/
+                        // [END_EXCLUDE]
+                    }
+
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
+                        Log.d("tag", "onChildMoved:" + dataSnapshot.getKey());
+
+                        // A comment has changed position, use the key to determine if we are
+                        // displaying this comment and if so move it.
+                        /*Comment movedComment = dataSnapshot.getValue(Comment.class);
+                        String commentKey = dataSnapshot.getKey();*/
+
+                        // ...
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.w("tag", "postComments:onCancelled", databaseError.toException());
+                        Toast.makeText(mContext, "Failed to load comments.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                };
+                ref.addChildEventListener(childEventListener);
+                // [END child_event_listener_recycler]
+
+                // Store reference to listener so it can be removed on app stop
+                mChildEventListener = childEventListener;
+            }
+
+            @Override
+            public ContentsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+                LayoutInflater inflater = LayoutInflater.from(mContext);
+                View view = inflater.inflate(R.layout.ingredient, parent, false);
+                return new ContentsViewHolder(view);
+            }
+
+            @Override
+            public void onBindViewHolder(ContentsViewHolder holder, int position) {
+                String name = mIngredientsName.get(position);
+                String quantity = mIngredientsQuantity.get(position);
+                holder.mIngrQuantity.setText(name);
+                holder.mIngrQuantity.setText(quantity);
+            }
+
+            @Override
+            public int getItemCount() {
+                return mIngredientsName.size();
+            }
+
+            public void cleanupListener() {
+                if (mChildEventListener != null) {
+                    mDatabaseReference.removeEventListener(mChildEventListener);
                 }
-
-                @Override
-                public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
-                    Log.d(TAG, "onChildMoved:" + dataSnapshot.getKey());
-
-                    // A comment has changed position, use the key to determine if we are
-                    // displaying this comment and if so move it.
-                    Comment movedComment = dataSnapshot.getValue(Comment.class);
-                    String commentKey = dataSnapshot.getKey();
-
-                    // ...
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    Log.w(TAG, "postComments:onCancelled", databaseError.toException());
-                    Toast.makeText(mContext, "Failed to load comments.",
-                            Toast.LENGTH_SHORT).show();
-                }
-            };
-            ref.addChildEventListener(childEventListener);
-            // [END child_event_listener_recycler]
-
-            // Store reference to listener so it can be removed on app stop
-            mChildEventListener = childEventListener;
-        }
-
-        @Override
-        public IngredientsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            }
 
         }
-
-        @Override
-        public void onBindViewHolder(IngredientsViewHolder holder, int position) {
-
-        }
-
-        @Override
-        public int getItemCount() {
-            return 0;
-        }
-    }*/
 }

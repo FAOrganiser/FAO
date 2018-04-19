@@ -9,19 +9,27 @@ public class ShoppingList {
     private HashMap<String, String> content = new HashMap<>();
     private String name;
 
-    public void setmIngredients(HashMap<String, String> mIngredients) {
-        content = mIngredients;
-    }
+    public ShoppingList() {}
 
-    public void setmName(String mName) {
+    public ShoppingList(String mName, HashMap<String, String> ingredients) {
+        content = ingredients;
         name = mName;
     }
 
-    public ShoppingList() {}
+    public void setContent(HashMap<String, String> mIngredients) {
+        content = mIngredients;
+    }
 
-    public ShoppingList(String name, HashMap<String, String> ingredients) {
-        content = ingredients;
-        this.name = name;
+    public void setName(String mName) {
+        name = mName;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public HashMap<String, String> getmContent() {
+        return content;
     }
 
     public HashMap<String, Object> toMap() {
@@ -34,6 +42,7 @@ public class ShoppingList {
     }
 
     public static class Ingredient {
+
         private String mIngredient;
         private String mQuantity;
 
@@ -41,13 +50,23 @@ public class ShoppingList {
             this.mIngredient = mIngredient;
             this.mQuantity = mQuantity;
         }
+
+        public void setIngredient(String mIngredient) {
+            this.mIngredient = mIngredient;
+        }
+
+        public void setQuantity(String mQuantity) {
+            this.mQuantity = mQuantity;
+        }
+
+        public String getIngredient() {
+            return mIngredient;
+        }
+
+        public String getQuantity() {
+            return mQuantity;
+        }
     }
 
-    public String getName() {
-        return name;
-    }
 
-    public HashMap<String, String> getmIngredients() {
-        return content;
-    }
 }
