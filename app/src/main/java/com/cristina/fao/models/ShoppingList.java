@@ -6,21 +6,29 @@ import java.util.List;
 
 public class ShoppingList {
 
-    private HashMap<String, String> mIngredients = new HashMap<>();
-    private String mName;
+    private HashMap<String, String> content = new HashMap<>();
+    private String name;
+
+    public void setmIngredients(HashMap<String, String> mIngredients) {
+        content = mIngredients;
+    }
+
+    public void setmName(String mName) {
+        name = mName;
+    }
 
     public ShoppingList() {}
 
     public ShoppingList(String name, HashMap<String, String> ingredients) {
-        mIngredients = ingredients;
-        mName = name;
+        content = ingredients;
+        this.name = name;
     }
 
     public HashMap<String, Object> toMap() {
 
         HashMap<String, Object> map = new HashMap<>();
-        map.put("name", mName);
-        map.put("content", mIngredients);
+        map.put("name", name);
+        map.put("content", content);
 
         return map;
     }
@@ -36,6 +44,10 @@ public class ShoppingList {
     }
 
     public String getName() {
-        return mName;
+        return name;
+    }
+
+    public HashMap<String, String> getmIngredients() {
+        return content;
     }
 }

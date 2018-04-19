@@ -1,4 +1,4 @@
-package com.cristina.fao;
+package com.cristina.fao.lists;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.cristina.fao.R;
 import com.cristina.fao.models.ShoppingList;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -51,9 +52,14 @@ public class NewListActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                mListName = mNameEditText.getText().toString();
+                if (mNameEditText.getVisibility() == View.VISIBLE) {
+                    mListName = mNameEditText.getText().toString();
+                    mNameEditText.setVisibility(View.INVISIBLE);
+                }
                 mIngrList = mIngredientEditText.getText().toString();
+                mIngredientEditText.setText("");
                 mQuantityList = mQuantityEditText.getText().toString();
+                mQuantityEditText.setText("");
                 if (mListName.matches("")) {
                     Toast.makeText(getApplicationContext(),
                             "You must introduce a name for the list", Toast.LENGTH_SHORT).show();

@@ -19,10 +19,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".HomeUserActivity" />
-        <activity android:name=".ListActivity" />
-        <activity android:name=".DetailListActivity" />
+        <activity android:name=".lists.ListActivity" />
+        <activity android:name=".lists.DetailListActivity" />
         <activity android:name=".FamilyActivity" />
-        <activity android:name=".NewListActivity"></activity>
+        <activity android:name=".lists.NewListActivity"></activity>
     </application>
 
 </manifest>

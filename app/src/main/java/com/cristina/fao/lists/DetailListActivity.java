@@ -1,4 +1,4 @@
-package com.cristina.fao;
+package com.cristina.fao.lists;
 
 import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.cristina.fao.R;
 import com.cristina.fao.models.ShoppingList;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;

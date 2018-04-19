@@ -1,4 +1,4 @@
-package com.cristina.fao;
+package com.cristina.fao.lists;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -6,6 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.cristina.fao.R;
 
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.AdapterViewHolder> {
 
@@ -31,7 +33,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.AdapterViewHol
 
     @Override
     public void onBindViewHolder(ListAdapter.AdapterViewHolder holder, int position) {
-        // TODO: de adaugat numele, configurat containere
+
     }
 
     @Override

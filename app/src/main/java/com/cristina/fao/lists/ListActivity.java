@@ -1,4 +1,4 @@
-package com.cristina.fao;
+package com.cristina.fao.lists;
 
 import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
@@ -6,12 +6,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cristina.fao.R;
 import com.cristina.fao.models.ShoppingList;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.database.DatabaseReference;
@@ -93,7 +95,7 @@ public class ListActivity extends AppCompatActivity{
                        // startActivity(intent);
                     }
                 });
-
+                Log.i("tag5", model.getName());
                 viewHolder.itemView.setText(model.getName());
             }
         };
@@ -104,6 +106,22 @@ public class ListActivity extends AppCompatActivity{
     public Query getQuery(DatabaseReference databaseReference, String admin) {
         // All the lists
         return databaseReference.child("family-lists").child(mFamilyKey);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (mAdapter != null) {
+            mAdapter.startListening();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mAdapter != null) {
+            mAdapter.stopListening();
+        }
     }
 
     public class ListViewHolder extends RecyclerView.ViewHolder {

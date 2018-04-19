@@ -18,8 +18,12 @@ import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 /*
 TODO: interfata pentru home-ul utilizatorului
@@ -32,7 +36,7 @@ public class HomeUserActivity extends AppCompatActivity {
     DatabaseReference mDatabase;
 
     private String mFamilyKey;
-    private boolean mHasFamily = false;
+    private boolean mHasFamily;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +47,12 @@ public class HomeUserActivity extends AppCompatActivity {
 
         mCreateFamilyButton = (Button) findViewById(R.id.create_family);
         mOpenFamilyButton = (Button) findViewById(R.id.open_family_button);
+
+        //hasFamily();
+        /*if (mHasFamily) {
+            Log.i("TAG", "are familie");
+            mOpenFamilyButton.setVisibility(View.VISIBLE);
+        }*/
 
         mCreateFamilyButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -65,14 +75,11 @@ public class HomeUserActivity extends AppCompatActivity {
      * @param uid
      */
     public void openFamily(String uid) {
-        if (mHasFamily) {
-            Intent intent = new Intent(getApplicationContext(), FamilyActivity.class);
-            intent.putExtra(FamilyActivity.FAMILY_KEY_EXTRA, mFamilyKey);
-            startActivity(intent);
-        } else {
-            Toast.makeText(getApplicationContext(), "Family missing.", Toast.LENGTH_SHORT)
-                    .show();
-        }
+
+        Intent intent = new Intent(getApplicationContext(), FamilyActivity.class);
+        intent.putExtra(FamilyActivity.FAMILY_KEY_EXTRA, mFamilyKey);
+        startActivity(intent);
+
     }
 
     /**
@@ -94,6 +101,32 @@ public class HomeUserActivity extends AppCompatActivity {
         mHasFamily = true;
         mOpenFamilyButton.setVisibility(View.VISIBLE);
         openFamily(uid);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (getUid() == null) Log.i("tag2", "user invalid");
+        else Log.i("tag3", getUid());
+        DatabaseReference query = mDatabase.child("users").child(getUid()).child("family_id");
+        ValueEventListener postListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // Get Post object and use the values to update the UI
+                String familyId = (String) dataSnapshot.getValue();
+                if (familyId == null) {
+                    Log.i("TGA1", "nu are familie");
+                } else {
+                    mOpenFamilyButton.setVisibility(View.VISIBLE);
+                    mFamilyKey = familyId;
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        };
+
+        query.addValueEventListener(postListener);
     }
 
     @Override
