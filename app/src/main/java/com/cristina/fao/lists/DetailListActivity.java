@@ -22,6 +22,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -32,25 +34,29 @@ public class DetailListActivity extends AppCompatActivity {
     public static final String EXTRA_LIST_KEY = "list_key";
 
     private DatabaseReference mListReference;
-    private DatabaseReference mIngredientsReference;
+    private DatabaseReference mFamilyListReference;
     private ValueEventListener mListListener;
     private RecyclerView mContentsRecycler;
     private ContentsAdapter mContentsAdapter;
 
-    private String mPostKey;
+    private TextView mListName;
+
+    private String mListKey;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_list);
 
-        mPostKey = getIntent().getStringExtra(EXTRA_LIST_KEY);
-        if (mPostKey == null) {
-            throw new IllegalArgumentException("Must pass EXTRA_LIST_KEY");
+        mListKey = getIntent().getStringExtra(EXTRA_LIST_KEY);
+        if (mListKey == null ) {
+            throw new IllegalArgumentException("Must pass key");
         }
 
-        // Initialize Database
+        mFamilyListReference = FirebaseDatabase.getInstance().getReference()
+                .child("lists").child(mListKey);
         mListReference = FirebaseDatabase.getInstance().getReference()
-                .child("family-lists").child(mPostKey);
+                .child("lists").child(mListKey).child("ingredients");
 
         mContentsRecycler = (RecyclerView) findViewById(R.id.recycler);
 
@@ -61,36 +67,46 @@ public class DetailListActivity extends AppCompatActivity {
 
         mContentsRecycler.setHasFixedSize(true);
 
-        mContentsRecycler.setAdapter(mContentsAdapter);
+        mListName = (TextView) findViewById(R.id.list_detail_name);
+
     }
 
     @Override
     public void onStart() {
         super.onStart();
 
-        // Add value event listener to the post
-        // [START post_value_event_listener]
-        /*ValueEventListener postListener = new ValueEventListener() {
+        ValueEventListener postListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                // Get Post object and use the values to update the UI
                 ShoppingList list = dataSnapshot.getValue(ShoppingList.class);
-                mContentsAdapter.mIngredientsName = list.getmIngredients().keySet();
-                mContentsAdapter.mIngredientQuantity = (ArrayList<String>) list.getmIngredients().values();
-                // TODO: setare elemente de UI cu datele luate
+                if (list != null) {
+                    mListName.setText(list.getName());
+                } else {
+                    Log.i("error", "null");
+                }
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {}
         };
-        mListReference.addValueEventListener(postListener);*/
+        mFamilyListReference.addValueEventListener(postListener);
 
-        // Keep copy of post listener so we can remove it when app stops
-        //mListListener = postListener;
+        mListListener = postListener;
 
         mContentsAdapter = new ContentsAdapter(this, mListReference);
         mContentsRecycler.setAdapter(mContentsAdapter);
 
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        if (mListListener != null) {
+            mFamilyListReference.removeEventListener(mListListener);
+        }
+
+        mContentsAdapter.cleanupListener();
     }
 
     private static class ContentsViewHolder extends RecyclerView.ViewHolder {
@@ -112,38 +128,36 @@ public class DetailListActivity extends AppCompatActivity {
             private DatabaseReference mDatabaseReference;
             private ChildEventListener mChildEventListener;
 
-            private List<String> mIngredientsName = new ArrayList<>();
-            private List<String> mIngredientsQuantity = new ArrayList<>();
+            private List<ShoppingList.Ingredient> mIngredients = new ArrayList<>();
 
             public ContentsAdapter(final Context context, DatabaseReference ref) {
                 mContext = context;
                 mDatabaseReference = ref;
 
-                // Create child event listener
-                // [START child_event_listener_recycler]
                 ChildEventListener childEventListener = new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
-                        Log.d("tag", "onChildAdded:" + dataSnapshot.getKey());
+                       // Log.d("tag", "onChildAdded:" + dataSnapshot.getKey());
 
                         // A new comment has been added, add it to the displayed list
                         ShoppingList.Ingredient ingr = dataSnapshot.getValue(ShoppingList.Ingredient.class);
 
                         // [START_EXCLUDE]
                         // Update RecyclerView
-                        mIngredientsName.add(ingr.getIngredient());
-                        mIngredientsQuantity.add(ingr.getQuantity());
-                        notifyItemInserted(mIngredientsName.size() - 1);
+                        //mIngredientsName.add(ingr.getIngredient());
+                       // mIngredientsQuantity.add(ingr.getQuantity());
+                        mIngredients.add(ingr);
+                        notifyItemInserted(mIngredients.size() - 1);
                         // [END_EXCLUDE]
                     }
 
                     @Override
                     public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
-                        Log.d("tag", "onChildChanged:" + dataSnapshot.getKey());
+                       // Log.d("tag", "onChildChanged:" + dataSnapshot.getKey());
 
                         // A comment has changed, use the key to determine if we are displaying this
                         // comment and if so displayed the changed comment.
-                        ShoppingList.Ingredient newIngr = dataSnapshot.getValue(ShoppingList.Ingredient.class);
+                        /*ShoppingList.Ingredient newIngr = dataSnapshot.getValue(ShoppingList.Ingredient.class);
 
                         // [START_EXCLUDE]
                         int ingrIndex = mIngredientsName.indexOf(newIngr.getIngredient());
@@ -157,7 +171,7 @@ public class DetailListActivity extends AppCompatActivity {
                         } else {
                             Log.w("tag", "onChildChanged:unknown_child:" + ingrIndex);
                         }
-                        // [END_EXCLUDE]
+                        // [END_EXCLUDE]*/
                     }
 
                     @Override
@@ -185,7 +199,7 @@ public class DetailListActivity extends AppCompatActivity {
 
                     @Override
                     public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
-                        Log.d("tag", "onChildMoved:" + dataSnapshot.getKey());
+                       /// Log.d("tag", "onChildMoved:" + dataSnapshot.getKey());
 
                         // A comment has changed position, use the key to determine if we are
                         // displaying this comment and if so move it.
@@ -197,9 +211,9 @@ public class DetailListActivity extends AppCompatActivity {
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
-                        Log.w("tag", "postComments:onCancelled", databaseError.toException());
-                        Toast.makeText(mContext, "Failed to load comments.",
-                                Toast.LENGTH_SHORT).show();
+                       // Log.w("tag", "postComments:onCancelled", databaseError.toException());
+                       // Toast.makeText(mContext, "Failed to load comments.",
+                              //  Toast.LENGTH_SHORT).show();
                     }
                 };
                 ref.addChildEventListener(childEventListener);
@@ -218,15 +232,14 @@ public class DetailListActivity extends AppCompatActivity {
 
             @Override
             public void onBindViewHolder(ContentsViewHolder holder, int position) {
-                String name = mIngredientsName.get(position);
-                String quantity = mIngredientsQuantity.get(position);
-                holder.mIngrQuantity.setText(name);
-                holder.mIngrQuantity.setText(quantity);
+                ShoppingList.Ingredient ingredient = mIngredients.get(position);
+                holder.mIngrName.setText(ingredient.getName());
+                holder.mIngrQuantity.setText(ingredient.getQuantity());
             }
 
             @Override
             public int getItemCount() {
-                return mIngredientsName.size();
+                return mIngredients.size();
             }
 
             public void cleanupListener() {

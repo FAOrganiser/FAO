@@ -33,7 +33,7 @@ public class NewListActivity extends AppCompatActivity {
     private String mIngrList;
     private String mQuantityList;
 
-    private HashMap<String, String> mIngredients = new HashMap<>();
+    private List<ShoppingList.Ingredient> mIngredients = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +70,7 @@ public class NewListActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(),
                             "You must introduce the quantity", Toast.LENGTH_SHORT).show();
                 } else {
-                    mIngredients.put(mIngrList, mQuantityList);
+                    mIngredients.add(new ShoppingList.Ingredient(mIngrList, mQuantityList));
                 }
             }
         });

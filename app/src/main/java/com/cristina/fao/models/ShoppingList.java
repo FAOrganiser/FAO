@@ -6,18 +6,18 @@ import java.util.List;
 
 public class ShoppingList {
 
-    private HashMap<String, String> content = new HashMap<>();
+    private List<Ingredient> ingredients;
     private String name;
 
     public ShoppingList() {}
 
-    public ShoppingList(String mName, HashMap<String, String> ingredients) {
-        content = ingredients;
-        name = mName;
+    public ShoppingList(String name, List<Ingredient> ingr) {
+        this.ingredients = ingr;
+        this.name = name;
     }
 
-    public void setContent(HashMap<String, String> mIngredients) {
-        content = mIngredients;
+    public void setContent(List<Ingredient> ingr) {
+        ingredients = ingr;
     }
 
     public void setName(String mName) {
@@ -28,43 +28,45 @@ public class ShoppingList {
         return name;
     }
 
-    public HashMap<String, String> getmContent() {
-        return content;
+    public List<Ingredient> getIngredients() {
+        return ingredients;
     }
 
     public HashMap<String, Object> toMap() {
 
         HashMap<String, Object> map = new HashMap<>();
         map.put("name", name);
-        map.put("content", content);
+        map.put("ingredients", ingredients);
 
         return map;
     }
 
     public static class Ingredient {
 
-        private String mIngredient;
-        private String mQuantity;
+        private String name;
+        private String quantity;
 
-        public Ingredient(String mIngredient, String mQuantity) {
-            this.mIngredient = mIngredient;
-            this.mQuantity = mQuantity;
+        public Ingredient() {}
+
+        public Ingredient(String name, String quantity) {
+            this.name = name;
+            this.quantity = quantity;
         }
 
-        public void setIngredient(String mIngredient) {
-            this.mIngredient = mIngredient;
+        public void setName(String name) {
+            this.name = name;
         }
 
-        public void setQuantity(String mQuantity) {
-            this.mQuantity = mQuantity;
+        public void setQuantity(String quantity) {
+            this.quantity = quantity;
         }
 
-        public String getIngredient() {
-            return mIngredient;
+        public String getName() {
+            return name;
         }
 
         public String getQuantity() {
-            return mQuantity;
+            return quantity;
         }
     }
 
