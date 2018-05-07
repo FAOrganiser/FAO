@@ -9,22 +9,55 @@
 
     <Button
         android:id="@+id/create_family"
-        android:layout_width="101dp"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="80dp"
-        android:layout_marginStart="80dp"
-        android:layout_marginTop="48dp"
+        android:layout_width="306dp"
+        android:layout_height="52dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="68dp"
+        android:background="@color/fui_bgPhone"
         android:text="Create Family"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="115dp"
+        android:layout_height="107dp"
+        android:layout_marginLeft="52dp"
+        android:layout_marginStart="52dp"
+        android:layout_marginTop="36dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/userName"
+        app:srcCompat="@android:drawable/sym_def_app_icon" />
+
+    <TextView
+        android:id="@+id/userName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="52dp"
+        android:layout_marginStart="52dp"
+        android:layout_marginTop="44dp"
+        android:text="TextView"
+        android:textColor="@color/common_google_signin_btn_text_dark_focused"
+        android:textSize="35sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/open_family_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="96dp"
-        android:text="OPEN FAMILY"
-        android:visibility="invisible"
+        android:id="@+id/see_families"
+        android:layout_width="309dp"
+        android:layout_height="51dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="12dp"
+        android:background="@color/fui_bgPhone"
+        android:text="SEE FAMILIES"
+        app:layout_constraintEnd_toEndOf="@+id/create_family"
+        app:layout_constraintHorizontal_bias="0.818"
         app:layout_constraintStart_toStartOf="@+id/create_family"
         app:layout_constraintTop_toBottomOf="@+id/create_family" />
+
 </android.support.constraint.ConstraintLayout>
