@@ -2,13 +2,15 @@ package com.cristina.fao.models;
 
 public class User {
 
-    private String mName;
-    private String mEmail;
+    public String username;
+    public String email;
 
-    public User() {}
+    public User() {
+        // Default constructor required for calls to DataSnapshot.getValue(User.class)
+    }
 
-    public User(String name, String email) {
-        mName = name;
-        mEmail = email;
+    public User(String username, String email) {
+        this.username = username;
+        this.email = email;
     }
 }

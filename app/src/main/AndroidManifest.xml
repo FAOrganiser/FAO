@@ -24,7 +24,7 @@
         <activity android:name=".FamilyActivity" />
         <activity android:name=".lists.NewListActivity" />
         <activity android:name=".DisplayFamiliesActivity" />
-        <activity android:name=".CreateFamilyActivity"></activity>
+        <activity android:name=".CreateFamilyActivity" />
     </application>
 
 </manifest>

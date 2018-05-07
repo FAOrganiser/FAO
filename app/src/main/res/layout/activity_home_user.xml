@@ -56,7 +56,7 @@
         android:background="@color/fui_bgPhone"
         android:text="SEE FAMILIES"
         app:layout_constraintEnd_toEndOf="@+id/create_family"
-        app:layout_constraintHorizontal_bias="0.818"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="@+id/create_family"
         app:layout_constraintTop_toBottomOf="@+id/create_family" />
 

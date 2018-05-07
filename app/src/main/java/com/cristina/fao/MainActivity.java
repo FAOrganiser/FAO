@@ -4,82 +4,186 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.cristina.fao.models.User;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import org.w3c.dom.Text;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
-    private static final int RC_SIGN_IN = 123;
+    private static final String TAG = "SignInActivity";
 
+    private DatabaseReference mDatabase;
+    private FirebaseAuth mAuth;
+
+    private EditText mEmailField;
+    private EditText mPasswordField;
+    private Button mSignInButton;
+    private Button mSignUpButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-       // errorView = (TextView) findViewById(R.id.errorMessage);
+        Log.i("tag", "nu");
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        mAuth = FirebaseAuth.getInstance();
 
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        if (auth.getCurrentUser() != null) {
-            // already signed in
-        } //else {
-            // not signed in
+        // Views
+        mEmailField = (EditText) findViewById(R.id.field_email);
+        mPasswordField = (EditText) findViewById(R.id.field_password);
+        mSignInButton = (Button) findViewById(R.id.button_sign_in);
+        mSignUpButton = (Button) findViewById(R.id.button_sign_up);
 
-            startActivityForResult(
-                    // Get an instance of AuthUI based on the default app
-                    AuthUI.getInstance()
-                            .createSignInIntentBuilder()
-                            .setTheme(R.style.AppTheme)
-                            .setIsSmartLockEnabled(false)
-                            .build(),
-                    RC_SIGN_IN);
-        }
+        // Click listeners
+        mSignInButton.setOnClickListener(this);
+        mSignUpButton.setOnClickListener(this);
 
+        Log.i("tag", "done");
+    }
 
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        // RC_SIGN_IN is the request code you passed into startActivityForResult(...) when starting the sign in flow.
-        if (requestCode == RC_SIGN_IN) {
-            IdpResponse response = IdpResponse.fromResultIntent(data);
-
-            // Successfully signed in
-            if (resultCode == RESULT_OK) {
-                Intent intent = new Intent(this, HomeUserActivity.class);
-                //startActivity(HomeUserActivity.createIntent(this, response));
-                startActivity(intent);
-                finish();
-            } else {
-                // Sign in failed
-                if (response == null) {
-                    // User pressed back button
-                    showSnackbar(R.string.sign_in_cancelled);
-                    return;
-                }
-
-                if (response.getError().getErrorCode() == ErrorCodes.NO_NETWORK) {
-                    showSnackbar(R.string.no_internet_connection);
-                    return;
-                }
-
-                showSnackbar(R.string.unknown_error);
-                Log.e("TAG", "Sign-in error: ", response.getError());
-            }
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.i("tag", "da");
+        // Check auth on Activity start
+        if (mAuth.getCurrentUser() != null) {
+            onAuthSuccess(mAuth.getCurrentUser());
         }
     }
 
-    public void showSnackbar(int message) {
-       //errorView.setText(getString(message));
-      // errorView.setVisibility(View.VISIBLE);
+    private void signIn() {
+        Log.d(TAG, "signIn");
+        if (!validateForm()) {
+            return;
+        }
+
+        //showProgressDialog();
+        String email = mEmailField.getText().toString();
+        String password = mPasswordField.getText().toString();
+
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.d(TAG, "signIn:onComplete:" + task.isSuccessful());
+                        //hideProgressDialog();
+
+                        if (task.isSuccessful()) {
+                            onAuthSuccess(task.getResult().getUser());
+                        } else {
+                            Toast.makeText(MainActivity.this, "Sign In Failed",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
+
+    private void signUp() {
+        Log.d(TAG, "signUp");
+        if (!validateForm()) {
+            return;
+        }
+
+        //showProgressDialog();
+        String email = mEmailField.getText().toString();
+        String password = mPasswordField.getText().toString();
+
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.d(TAG, "createUser:onComplete:" + task.isSuccessful());
+                        //hideProgressDialog();
+
+                        if (task.isSuccessful()) {
+                            onAuthSuccess(task.getResult().getUser());
+                        } else {
+                            Log.i("tag1", "am ajuns");
+                            Toast.makeText(MainActivity.this, "Sign Up Failed",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
+    }
+
+    private void onAuthSuccess(FirebaseUser user) {
+        String username = usernameFromEmail(user.getEmail());
+
+        // Write new user
+        writeNewUser(user.getUid(), username, user.getEmail());
+
+        // Go to MainActivity
+        startActivity(new Intent(MainActivity.this, HomeUserActivity.class));
+        finish();
+    }
+
+    private String usernameFromEmail(String email) {
+        if (email.contains("@")) {
+            return email.split("@")[0];
+        } else {
+            return email;
+        }
+    }
+
+    private boolean validateForm() {
+        boolean result = true;
+        if (TextUtils.isEmpty(mEmailField.getText().toString())) {
+            mEmailField.setError("Required");
+            result = false;
+        } else {
+            mEmailField.setError(null);
+        }
+
+        if (TextUtils.isEmpty(mPasswordField.getText().toString())) {
+            mPasswordField.setError("Required");
+            result = false;
+        } else {
+            mPasswordField.setError(null);
+        }
+
+        return result;
+    }
+
+    // [START basic_write]
+    private void writeNewUser(String userId, String name, String email) {
+        User user = new User(name, email);
+
+        mDatabase.child("users").child(userId).setValue(user);
+
+        mDatabase.child("emailToUid").child(name).setValue(userId);
+    }
+    // [END basic_write]
+
+    @Override
+    public void onClick(View v) {
+        int i = v.getId();
+        Log.i("tag5", "pupic");
+        if (i == R.id.button_sign_in) {
+            signIn();
+        } else if (i == R.id.button_sign_up) {
+            Log.i("tag3", "daaaaaaaaaaaaaaaaaaa");
+            signUp();
+        }
     }
 }

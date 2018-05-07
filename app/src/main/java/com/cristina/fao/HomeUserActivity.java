@@ -86,31 +86,6 @@ public class HomeUserActivity extends AppCompatActivity {
     }
 
 
-   /* protected void onStart() {
-        super.onStart();
-        if (getUid() == null) Log.i("tag2", "user invalid");
-        else Log.i("tag3", getUid());
-        DatabaseReference query = mDatabase.child("users").child(getUid()).child("family_id");
-        ValueEventListener postListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // Get Post object and use the values to update the UI
-                String familyId = (String) dataSnapshot.getValue();
-                if (familyId == null) {
-                    Log.i("TGA1", "nu are familie");
-                } else {
-                   // mOpenFamilyButton.setVisibility(View.VISIBLE);
-                    mFamilyKey = familyId;
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {}
-        };
-
-        query.addValueEventListener(postListener);
-    }*/
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -180,7 +155,8 @@ public class HomeUserActivity extends AppCompatActivity {
     }
 
     public String getUserName() {
-        return FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
+        //return FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
+        return "";
     }
 
 }
